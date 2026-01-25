@@ -43,34 +43,51 @@ Function errorData($code : Integer; $message : Text; $data : Variant) : cs:C1710
 	// ============================================================================
 	// Parsing methods
 	// ============================================================================
-	
-	// Parse a JSON string or object into the appropriate JSON-RPC type
+
+	// Parse a JSON string, object, or collection into the appropriate JSON-RPC type(s)
 	// Returns an object with .type and .value properties
+	// For batch requests (collections), returns {type: "batch"; value: <collection of parsed messages>}
 Function parse($input : Variant) : Object
-	var $obj : Object
-	
-	// Handle string input
+	var $parsed : Variant
+
+	// Handle string input - parse JSON first
 	If (Value type:C1509($input)=Is text:K8:3)
-		$obj:=JSON Parse:C1218($input; Is object:K8:27)
-		If ($obj=Null:C1517)
+		$parsed:=JSON Parse:C1218($input)
+		If ($parsed=Null:C1517)
 			return {type: "invalid"; value: Null:C1517; error: "Failed to parse JSON"}
-		End if 
-	Else 
-		$obj:=$input
-	End if 
-	
+		End if
+	Else
+		$parsed:=$input
+	End if
+
+	// Check if batch (collection)
+	If (Value type:C1509($parsed)=Is collection:K8:32)
+		var $batch : Collection:=$parsed
+		var $results : Collection:=[]
+		var $item : Object
+		For each ($item; $batch)
+			$results.push(This:C1470._parseOne($item))
+		End for each
+		return {type: "batch"; value: $results}
+	End if
+
+	// Single message
+	return This:C1470._parseOne($parsed)
+
+	// Internal: Parse a single JSON-RPC message object
+Function _parseOne($obj : Object) : Object
 	// Validate jsonrpc version
 	If ($obj.jsonrpc#"2.0")
 		return {type: "invalid"; value: Null:C1517; error: "Invalid or missing jsonrpc version"}
-	End if 
-	
+	End if
+
 	// Determine message type based on properties
 	var $hasId : Boolean:=OB Is defined:C1231($obj; "id")
 	var $hasMethod : Boolean:=OB Is defined:C1231($obj; "method")
 	var $hasResult : Boolean:=OB Is defined:C1231($obj; "result")
 	var $hasError : Boolean:=OB Is defined:C1231($obj; "error")
-	
-	Case of 
+
+	Case of
 			// Error response: has id and error
 		: ($hasId && $hasError)
 			var $errorData : cs:C1710.ErrorData:=cs:C1710.ErrorData.new(\
@@ -78,22 +95,22 @@ Function parse($input : Variant) : Object
 				$obj.error.message; \
 				$obj.error.data)
 			return {type: "error"; value: cs:C1710.Error.new($obj.id; $errorData)}
-			
+
 			// Success response: has id and result
 		: ($hasId && $hasResult)
 			return {type: "response"; value: cs:C1710.Response.new($obj.id; $obj.result)}
-			
+
 			// Request: has id and method
 		: ($hasId && $hasMethod)
 			var $request : cs:C1710.Request:=cs:C1710.Request.new($obj.method; $obj.params)
 			$request.id:=$obj.id
 			return {type: "request"; value: $request}
-			
+
 			// Notification: has method but no id
 		: ($hasMethod && Not:C34($hasId))
 			return {type: "notification"; value: cs:C1710.Notification.new($obj.method; $obj.params)}
-			
-		Else 
+
+		Else
 			return {type: "invalid"; value: Null:C1517; error: "Cannot determine message type"}
 	End case 
 	
@@ -140,6 +157,10 @@ Function isResponse($obj : Object) : Boolean
 	// Check if a message is an error response
 Function isError($obj : Object) : Boolean
 	return OB Is defined:C1231($obj; "error") && OB Is defined:C1231($obj; "id")
+
+	// Check if input is a batch (collection of messages)
+Function isBatch($input : Variant) : Boolean
+	return Value type:C1509($input)=Is collection:K8:32
 	
 	// ============================================================================
 	// Error codes 
