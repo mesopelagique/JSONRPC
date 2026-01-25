@@ -1,0 +1,471 @@
+{
+	"_method_": {},
+	"cs.JSONRPC": {
+		"Init": {
+			"new()": {
+				"Syntax": "**.new**()",
+				"Params": [],
+				"Summary": ""
+			}
+		},
+		"Response": {
+			"new()": {
+				"Syntax": "**.new**( *id* : Variant; *result* : Object )",
+				"Params": [
+					[
+						"id",
+						"Variant",
+						"->"
+					],
+					[
+						"result",
+						"Object",
+						"->"
+					]
+				],
+				"Summary": ""
+			}
+		},
+		"Error": {
+			"new()": {
+				"Syntax": "**.new**( *id* : Variant; *error* : cs.JSONRPC.ErrorData )",
+				"Params": [
+					[
+						"id",
+						"Variant",
+						"->"
+					],
+					[
+						"error",
+						"cs.JSONRPC.ErrorData",
+						"->"
+					]
+				],
+				"Summary": ""
+			}
+		},
+		"ErrorData": {
+			"new()": {
+				"Syntax": "**.new**( *code* : Integer; *message* : Text; *data* : Variant )",
+				"Params": [
+					[
+						"code",
+						"Integer",
+						"->"
+					],
+					[
+						"message",
+						"Text",
+						"->"
+					],
+					[
+						"data",
+						"Variant",
+						"->"
+					]
+				],
+				"Summary": ""
+			}
+		},
+		"Request": {
+			"new()": {
+				"Syntax": "**.new**( *name* : Text; *params* : Object )",
+				"Params": [
+					[
+						"name",
+						"Text",
+						"->"
+					],
+					[
+						"params",
+						"Object",
+						"->"
+					]
+				],
+				"Summary": ""
+			}
+		},
+		"Notification": {
+			"new()": {
+				"Syntax": "**.new**( *method* : Text; *params* : Object )",
+				"Params": [
+					[
+						"method",
+						"Text",
+						"->"
+					],
+					[
+						"params",
+						"Object",
+						"->"
+					]
+				],
+				"Summary": ""
+			}
+		}
+	},
+	"Init": {
+		"isStandardError()": {
+			"Syntax": "**.isStandardError**( *code* : Integer ) : Boolean",
+			"Params": [
+				[
+					"code",
+					"Integer",
+					"->"
+				],
+				[
+					"",
+					"Boolean",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"isBatch()": {
+			"Syntax": "**.isBatch**( *input* : Variant ) : Boolean",
+			"Params": [
+				[
+					"input",
+					"Variant",
+					"->"
+				],
+				[
+					"",
+					"Boolean",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"isError()": {
+			"Syntax": "**.isError**( *obj* : Object ) : Boolean",
+			"Params": [
+				[
+					"obj",
+					"Object",
+					"->"
+				],
+				[
+					"",
+					"Boolean",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"isResponse()": {
+			"Syntax": "**.isResponse**( *obj* : Object ) : Boolean",
+			"Params": [
+				[
+					"obj",
+					"Object",
+					"->"
+				],
+				[
+					"",
+					"Boolean",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"errorData()": {
+			"Syntax": "**.errorData**( *code* : Integer; *message* : Text; *data* : Variant ) : cs.JSONRPC.ErrorData",
+			"Params": [
+				[
+					"code",
+					"Integer",
+					"->"
+				],
+				[
+					"message",
+					"Text",
+					"->"
+				],
+				[
+					"data",
+					"Variant",
+					"->"
+				],
+				[
+					"",
+					"cs.JSONRPC.ErrorData",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"isRequest()": {
+			"Syntax": "**.isRequest**( *obj* : Object ) : Boolean",
+			"Params": [
+				[
+					"obj",
+					"Object",
+					"->"
+				],
+				[
+					"",
+					"Boolean",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"parseError()": {
+			"Syntax": "**.parseError**( *obj* : Object ) : cs.JSONRPC.Error",
+			"Params": [
+				[
+					"obj",
+					"Object",
+					"->"
+				],
+				[
+					"",
+					"cs.JSONRPC.Error",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"error()": {
+			"Syntax": "**.error**( *id* : Variant; *code* : Integer; *message* : Text; *data* : Variant ) : cs.JSONRPC.Error",
+			"Params": [
+				[
+					"id",
+					"Variant",
+					"->"
+				],
+				[
+					"code",
+					"Integer",
+					"->"
+				],
+				[
+					"message",
+					"Text",
+					"->"
+				],
+				[
+					"data",
+					"Variant",
+					"->"
+				],
+				[
+					"",
+					"cs.JSONRPC.Error",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"parseResponse()": {
+			"Syntax": "**.parseResponse**( *obj* : Object ) : cs.JSONRPC.Response",
+			"Params": [
+				[
+					"obj",
+					"Object",
+					"->"
+				],
+				[
+					"",
+					"cs.JSONRPC.Response",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"parse()": {
+			"Syntax": "**.parse**( *input* : Variant ) : Object",
+			"Params": [
+				[
+					"input",
+					"Variant",
+					"->"
+				],
+				[
+					"",
+					"Object",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"notification()": {
+			"Syntax": "**.notification**( *method* : Text; *params* : Object ) : cs.JSONRPC.Notification",
+			"Params": [
+				[
+					"method",
+					"Text",
+					"->"
+				],
+				[
+					"params",
+					"Object",
+					"->"
+				],
+				[
+					"",
+					"cs.JSONRPC.Notification",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"getErrorDescription()": {
+			"Syntax": "**.getErrorDescription**( *code* : Integer ) : Text",
+			"Params": [
+				[
+					"code",
+					"Integer",
+					"->"
+				],
+				[
+					"",
+					"Text",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"response()": {
+			"Syntax": "**.response**( *id* : Variant; *result* : Object ) : cs.JSONRPC.Response",
+			"Params": [
+				[
+					"id",
+					"Variant",
+					"->"
+				],
+				[
+					"result",
+					"Object",
+					"->"
+				],
+				[
+					"",
+					"cs.JSONRPC.Response",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"isNotification()": {
+			"Syntax": "**.isNotification**( *obj* : Object ) : Boolean",
+			"Params": [
+				[
+					"obj",
+					"Object",
+					"->"
+				],
+				[
+					"",
+					"Boolean",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"request()": {
+			"Syntax": "**.request**( *method* : Text; *params* : Object ) : cs.JSONRPC.Request",
+			"Params": [
+				[
+					"method",
+					"Text",
+					"->"
+				],
+				[
+					"params",
+					"Object",
+					"->"
+				],
+				[
+					"",
+					"cs.JSONRPC.Request",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"INTERNAL_ERROR": {
+			"Syntax": "INTERNAL_ERROR : Integer"
+		},
+		"INVALID_PARAMS": {
+			"Syntax": "INVALID_PARAMS : Integer"
+		},
+		"INVALID_REQUEST": {
+			"Syntax": "INVALID_REQUEST : Integer"
+		},
+		"PARSE_ERROR": {
+			"Syntax": "PARSE_ERROR : Integer"
+		},
+		"METHOD_NOT_FOUND": {
+			"Syntax": "METHOD_NOT_FOUND : Integer"
+		},
+		"REQUEST_TIMEOUT": {
+			"Syntax": "REQUEST_TIMEOUT : Integer"
+		},
+		"CONNECTION_CLOSED": {
+			"Syntax": "CONNECTION_CLOSED : Integer"
+		},
+		"URL_ELICITATION_REQUIRED": {
+			"Syntax": "URL_ELICITATION_REQUIRED : Integer"
+		}
+	},
+	"Response": {
+		"result": {
+			"Syntax": "result : Object"
+		},
+		"id": {
+			"Syntax": "id : Variant"
+		},
+		"jsonrpc": {
+			"Syntax": "jsonrpc : Text"
+		}
+	},
+	"Error": {
+		"error": {
+			"Syntax": "error : cs.JSONRPC.ErrorData"
+		},
+		"id": {
+			"Syntax": "id : Variant"
+		},
+		"jsonrpc": {
+			"Syntax": "jsonrpc : Text"
+		}
+	},
+	"ErrorData": {
+		"message": {
+			"Syntax": "message : Text"
+		},
+		"data": {
+			"Syntax": "data : Variant"
+		},
+		"code": {
+			"Syntax": "code : Integer"
+		}
+	},
+	"Request": {
+		"params": {
+			"Syntax": "params : Object"
+		},
+		"method": {
+			"Syntax": "method : Text"
+		},
+		"id": {
+			"Syntax": "id : Text"
+		},
+		"jsonrpc": {
+			"Syntax": "jsonrpc : Text"
+		}
+	},
+	"Notification": {
+		"params": {
+			"Syntax": "params : Object"
+		},
+		"method": {
+			"Syntax": "method : Text"
+		},
+		"jsonrpc": {
+			"Syntax": "jsonrpc : Text"
+		}
+	}
+}
