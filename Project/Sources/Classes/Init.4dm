@@ -48,11 +48,15 @@ Function errorData($code : Integer; $message : Text; $data : Variant) : cs:C1710
 	// Returns an object with .type and .value properties
 	// For batch requests (collections), returns {type: "batch"; value: <collection of parsed messages>}
 Function parse($input : Variant) : Object
-	var $parsed : Variant
+	var $parsed : Variant:=Null:C1517
 	
 	// Handle string input - parse JSON first
 	If (Value type:C1509($input)=Is text:K8:3)
-		$parsed:=JSON Parse:C1218($input)
+		Try 
+			$parsed:=JSON Parse:C1218($input)
+		Catch 
+			return {type: "invalid"; value: Null:C1517; error: "Failed to parse JSON"}
+		End try 
 		If ($parsed=Null:C1517)
 			return {type: "invalid"; value: Null:C1517; error: "Failed to parse JSON"}
 		End if 
@@ -71,14 +75,28 @@ Function parse($input : Variant) : Object
 		return {type: "batch"; value: $results}
 	End if 
 	
+	If (Value type:C1509($parsed)#Is object:K8:27)
+		return {type: "invalid"; value: Null:C1517; error: "JSON-RPC payload must be an object or collection"}
+	End if 
+	
 	// Single message
 	return This:C1470._parseOne($parsed)
 	
 	// Internal: Parse a single JSON-RPC message object
-Function _parseOne($obj : Object) : Object
-	// Validate jsonrpc version
-	If ($obj.jsonrpc#"2.0")
-		return {type: "invalid"; value: Null:C1517; error: "Invalid or missing jsonrpc version"}
+Function _parseOne($obj : Variant) : Object
+	If (Value type:C1509($obj)#Is object:K8:27)
+		return {type: "invalid"; value: Null:C1517; error: "JSON-RPC message must be an object"}
+	End if 
+
+	// Be strict on explicit versions, but tolerate missing jsonrpc for interoperability.
+	// Some real-world peers emit valid request/response shapes without the jsonrpc field.
+	var $implicitVersion : Boolean:=False:C215
+	If (OB Is defined:C1231($obj; "jsonrpc"))
+		If ($obj.jsonrpc#"2.0")
+			return {type: "invalid"; value: Null:C1517; error: "Invalid jsonrpc version"}
+		End if 
+	Else 
+		$implicitVersion:=True:C214
 	End if 
 	
 	// Determine message type based on properties
@@ -90,25 +108,41 @@ Function _parseOne($obj : Object) : Object
 	Case of 
 			// Error response: has id and error
 		: ($hasId && $hasError)
+			var $errorCode : Integer:=0
+			var $errorMessage : Text:=""
+			var $errorPayload : Variant:=Null:C1517
+			Try 
+				If (OB Is defined:C1231($obj.error; "code"))
+					$errorCode:=Num($obj.error.code)
+				End if 
+				If (OB Is defined:C1231($obj.error; "message"))
+					$errorMessage:=String:C10($obj.error.message)
+				End if 
+				If (OB Is defined:C1231($obj.error; "data"))
+					$errorPayload:=$obj.error.data
+				End if 
+			Catch 
+				$errorMessage:=String:C10($obj.error)
+			End try 
 			var $errorData : cs:C1710.ErrorData:=cs:C1710.ErrorData.new(\
-				$obj.error.code; \
-				$obj.error.message; \
-				$obj.error.data)
-			return {type: "error"; value: cs:C1710.Error.new($obj.id; $errorData)}
+				$errorCode; \
+				$errorMessage; \
+				$errorPayload)
+			return {type: "error"; value: cs:C1710.Error.new($obj.id; $errorData); implicitJsonRpcVersion: $implicitVersion}
 			
 			// Success response: has id and result
 		: ($hasId && $hasResult)
-			return {type: "response"; value: cs:C1710.Response.new($obj.id; $obj.result)}
+			return {type: "response"; value: cs:C1710.Response.new($obj.id; $obj.result); implicitJsonRpcVersion: $implicitVersion}
 			
 			// Request: has id and method
 		: ($hasId && $hasMethod)
 			var $request : cs:C1710.Request:=cs:C1710.Request.new($obj.method; $obj.params)
 			$request.id:=$obj.id
-			return {type: "request"; value: $request}
+			return {type: "request"; value: $request; implicitJsonRpcVersion: $implicitVersion}
 			
 			// Notification: has method but no id
 		: ($hasMethod && Not:C34($hasId))
-			return {type: "notification"; value: cs:C1710.Notification.new($obj.method; $obj.params)}
+			return {type: "notification"; value: cs:C1710.Notification.new($obj.method; $obj.params); implicitJsonRpcVersion: $implicitVersion}
 			
 		Else 
 			return {type: "invalid"; value: Null:C1517; error: "Cannot determine message type"}
